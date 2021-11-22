@@ -48,8 +48,8 @@ def find_eig_vals_vect(img_cov):
 def run():
     img = load_image()
     m = find_mean(img)
-    img_mean_sub = subtract_mean(m, img)
-    cov = get_covariance(img_mean_sub)
+    img_sub_mean = subtract_mean(m, img)
+    cov = get_covariance(img_sub_mean)
     eig_vals, eigVects = find_eig_vals_vect(cov) # eig_vals[i] corresponds to eigVects[:, i]
     # -------> ### Left off on step 7 ###  <------- #
 
