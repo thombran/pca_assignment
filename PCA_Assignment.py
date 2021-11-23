@@ -5,8 +5,15 @@ import numpy.linalg as lg
 import matplotlib.pyplot as plt
 import os
 import sys
+"""
+@Authors: Brandon Thomas & Daniel Floyd
+@Date: 11/22/2021
+CIS 365 - Artificial Intelligence
+Professor Denton Bobeldyk
+Assignment 12 - Principal Component Analysis
+"""
 
-VECTORS_TO_KEEP = [15, 100, 200]
+VECTORS_TO_KEEP = [15, 100, 200] # Amt of vectors the program will run through
 
 # Make sure image is provided and exists in file system
 def load_image():
@@ -56,34 +63,33 @@ def calc_perc_variance(eig_vals, amt_vectors):
         total += value
     return eig_sum / total
 
-# To work according to assignment code posted, needed to swap matrix axis
-# i.e. cols became rows and rows became cols since (n, k) * (k, m) --> (n, m)
-def format_vectors(vectors):
-    final_matrix = [[pixel for pixel in range(len(vectors))] for pixel in range(len(vectors[0]))] # temp matrix
-    row_pos = 0
-    col_pos = 0
-    for vector in vectors:
-        for val in vector:
-            final_matrix[col_pos][row_pos] = val #Place val in [row][col] pos into [col][row] pos
-            col_pos += 1
-        col_pos = 0
-        row_pos += 1
-    return final_matrix
 
 # Driver function
 def run():
-    img = load_image()
-    m = find_mean(img)
-    img_sub_mean = subtract_mean(m, img)
-    cov = get_covariance(img_sub_mean)
-    eig_vals, eigVects = find_eig_vals_vect(cov) # eig_vals[i] corresponds to eigVects[:, i]
-    percent_variance = calc_perc_variance(eig_vals, VECTORS_TO_KEEP[0]) * 100
-    print(str(percent_variance) + '% variance')
-    eigenVectorsToKeep = format_vectors(eigVects[0: VECTORS_TO_KEEP[0]]) # Format vectors to correct dimensions and return
-    compressedImage = np.matmul(img_sub_mean, eigenVectorsToKeep)
-    lossyUnCompressedImage = np.matmul(compressedImage, np.transpose(eigenVectorsToKeep)) + m
-    result = plt.imshow(compressedImage, cmap='gray')
-    plt.show()
+    fig = plt.figure(figsize=(10,10)) # Figure where images will be shown
+    ROWS = 2 # Rows and cols for matplotlib figure at end of program completion
+    COLS = 2
+    pos = 1
+    for amt_vectors in VECTORS_TO_KEEP: # Loop through vectors and create lossy image for each
+        img = load_image()
+        m = find_mean(img)
+        img_sub_mean = subtract_mean(m, img)
+        cov = get_covariance(img_sub_mean)
 
+        eig_vals, eigVects = find_eig_vals_vect(cov) # eig_vals[i] corresponds to eigVects[:, i]
+        percent_variance = calc_perc_variance(eig_vals, amt_vectors) * 100
+        print(str(percent_variance) + '% variance for ' + str(amt_vectors) + ' vectors')
+
+        eigenVectorsToKeep = np.transpose(eigVects[0:amt_vectors]) # Format vectors to correct dimensions and return
+        compressedImage = np.matmul(img_sub_mean, eigenVectorsToKeep)
+        lossyUnCompressedImage = np.matmul(compressedImage, np.transpose(eigenVectorsToKeep)) + m
+
+        fig.add_subplot(ROWS, COLS, pos)
+        pos += 1
+
+        plt.imshow(lossyUnCompressedImage, cmap='gray')
+        plt.axis('off')
+        plt.title('Vectors kept: ' + str(amt_vectors))
+    plt.show()
 
 run()
